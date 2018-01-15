@@ -17,7 +17,7 @@
       class RestWeather extends React.Component {
         constructor(props) {
           super(props);
-          this.state = {temperature: '', weather: ''};
+          this.state = {temperature: '', weather: '', icon: ''};
         }
         componentDidMount() {
           fetch('https://api.openweathermap.org/data/2.5/weather?q=Helsinki&APPID=919dc7d31b8fa3d11f2f0e6462e85290')
@@ -26,16 +26,19 @@
              console.log(responseData);
               this.setState({ 
                 temperature: responseData.main.temp - 273.15,
-                weather: responseData.weather[0].main
+                weather: responseData.weather[0].main,
+                icon: responseData.weather[0].icon
               }); 
           });
         }
         
         render() { 
-          return (
+            const i = "http://openweathermap.org/img/w/" + this.state.icon + ".png";
+          return (            
             <div>
               <div>Temperature: {this.state.temperature} °C</div>
                <div>Weather: {this.state.weather}</div>
+               <div><img src={i} /></div>
             </div>
           );
         }
