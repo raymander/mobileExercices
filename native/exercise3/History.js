@@ -3,24 +3,24 @@ import {StackNavigator} from 'react-navigation';
 import { StyleSheet, Text, View, Button, Alert, TextInput, FlatList } from 'react-native';
 
 export default class History extends React.Component {
-  static navigationOptions = {title: 'History',};
+  static navigationOptions = {title: 'History'};
 
-  constructor(props) {
-    super(props);
-  }
+constructor(props) {
+  super(props);
+  
+
+}
 
   render() {
-    const { params } = this.props.navigation.state;
+    const {params} = this.props.navigation.state;
+
     return (
         <View style={styles.container}>
           <Text>History</Text>
-          <FlatList style={styles.list} data={this.props.data}
-                 renderItem={({item}) =>
-                 <Text>{item.key}</Text>
-          }
-              />
-          </View>
-    )
+          <FlatList data={params.data} renderItem={({item}) =>
+          <Text>{item.key}</Text>} />
+        </View>
+    );
   }
 }
 

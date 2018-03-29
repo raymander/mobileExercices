@@ -1,34 +1,34 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, TextInput, FlatList } from 'react-native';
-import {SQLite} from 'expo';
+import { StyleSheet, Text, View, Button, TextInput, FlatList, Alert } from 'react-native';
+import Expo, {SQLite} from 'expo';
 
-const db = SQLite.openDatabase('shopping.db');
+const db = SQLite.openDatabase('shoppingdb.db');
 
 export default class App extends React.Component {
 
 constructor(props) {
   super(props);
- this.state = {text: '', data: []}
+ this.state = {product: '', amount: '', shopping: []}
 }
 
 
   componentDidMount() {
     db.transaction(tx => {
-      tx.executeSql('create table if not exists shopping (id integer primary key not null, item text);');
+      tx.executeSql('create table if not exists shopping (id integer primary key not null, amount text, product text);');
     });
     this.updateList();
 }
 
- add = () => {
+ addItem = () => {
    db.transaction(tx => {
-           tx.executeSql('insert into shopping (item) values (?)', [this.state.text]);
+           tx.executeSql('insert into shopping (amount, product) values (?, ?)', [this.state.amount, this.state.product]);
    }, null, this.updateList)
 }
 
 updateList = () => {
    db.transaction(tx => {
      tx.executeSql('select * from shopping', [], (_, { rows }) =>
-       this.setState({data: rows._array})
+       this.setState({shopping: rows._array})
      );
    });
 }
@@ -41,34 +41,46 @@ deleteItem = (id) => {
     )
 }
 
-
+listSeparator = () => {
+  return (
+    <View
+      style={{
+        height: 5,
+        width: "80%",
+        backgroundColor: "#fff",
+        marginLeft: "10%"
+      }}
+    />
+  );
+};
 
   render() {
     return (
       <View style={styles.container}>
 
-  <TextInput style={{marginTop : "20%", width : 200, borderColor: 'gray', borderWidth: 1}}
-  onChangeText={(text) => this.setState({text})}
-  value={this.state.text}
+  <TextInput placeholder='Product' style={{marginTop: 30, fontSize: 18, width: 200, borderColor: 'gray', borderWidth: 1}}
+  onChangeText={(product) => this.setState({product})}
+  value={this.state.product}
+/>
+<TextInput placeholder='Amount' style={{ marginTop: 5, marginBottom: 5, fontSize:18, width: 200, borderColor: 'gray', borderWidth: 1}}
+onChangeText={(amount) => this.setState({amount})}
+value={this.state.amount}
 />
 
-<Button onPress={this.add} title="Add" />
+
+<Button onPress={this.addItem} title="Add" />
 
 	<Text>Shopping list</Text>
 
 
 
-
-     <FlatList
-          style={{marginLeft : "5%"}}
-          keyExtractor={item => item.id}
-          renderItem={({item}) =>
-          <View style={styles.listcontainer}>
-          <Text style={{fontSize: 18}}> {item.item} </Text>
-          <Text style={{fontSize: 18, color: '#0000ff'}} onPress={() =>
-            this.deleteItem(item.id)}>done</Text></View>}
-            data={this.state.data}
+      <FlatList
+            style={{marginLeft : "5%"}}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => <View style={styles.listcontainer}><Text style={{fontSize: 18}}>{item.product}, {item.amount}   </Text>
+            <Text style={{fontSize: 18, color: '#0000ff'}} onPress={() => this.deleteItem(item.id)}>done</Text></View>} data={this.state.shopping} ItemSeparatorComponent={this.listSeparator}
       />
+
 
       </View>
     );
