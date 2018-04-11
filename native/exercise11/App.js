@@ -8,10 +8,30 @@ export default class App extends React.Component {
     super(props);
     this.state = {
       address: '',
-      region: {latitude: 60.200692, longitude: 24.934302, latitudeDelta: 0.0322,
-        longitudeDelta: 0.0221}
+      region: {
+        latitude: 60.200692,
+        longitude: 24.934302,
+        latitudeDelta: 0.0322,
+        longitudeDelta: 0.0221
+      }
+    }
   }
-  }
+
+    componentDidMount() {
+      this.getLocation();
+    }
+
+    getLocation = async () => {
+    //Check permission
+      let { status } = await Permissions.askAsync(Permissions.LOCATION);
+        if (status !== 'granted') {
+          Alert.alert('No permission to access location');
+        }
+        else {
+          let location = await Location.getCurrentPositionAsync({enableHighAccuracy:false});
+          this.setState({region:{latitude:location.coords.latitude, longitude:location.coords.longitude}})
+      }
+    };
 
 
   search = () => {

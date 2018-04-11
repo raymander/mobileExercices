@@ -5,7 +5,7 @@ import { StyleSheet, Text, View, Button, TextInput, FlatList, Alert, StatusBar, 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {currencies: [], amount: '', pick: ''};
+    this.state = {currencies: [], amount: 0, pick: '', pickIndex: 0, total: 0};
   }
 
   componentDidMount = () => {
@@ -13,14 +13,40 @@ export default class App extends React.Component {
     fetch(url)
       .then((response) => response.json())
       .then((responseJson) => {
-let rates = responseJson.rates;
-        this.setState({currencies: rates});
+        this.setState({
+          currencies: responseJson.rates
+        });
       })
       .catch((error) => {
         Alert.alert(error);
       });
   }
 
+    renderPickItems = () => {
+      let storeData = [];
+      for (var currencyType in this.state.currencies) {
+          var pickerItem = (
+          <Picker.Item
+          label={currencyType}
+          value={currencyType}
+          key={currencyType}
+          />
+          );
+          storeData.push(pickerItem);
+          }
+      return storeData;
+    };
+
+    convert = () => {
+      let amount = this.state.amount
+      let pick  = this.state.pick
+      let cur = this.state.currencies
+      let pickedRate = cur[pick]
+      let total = (amount/pickedRate).toFixed(2)
+      this.setState({
+        total
+      })
+    }
 
   listSeparator = () => {
     return (
@@ -41,24 +67,29 @@ let rates = responseJson.rates;
       <View style={styles.container}>
         <StatusBar hidden={true} />
 
-        <TextInput style={{fontSize: 18, width: 200}} placeholder='amount' onChangeText={(amount) => this.setState({amount})} />
+        <TextInput style={{fontSize: 18, width: 200}} placeholder='amount' keyboardType='numeric' onChangeText={(amount) => {this.setState({amount: parseInt(amount)});
+      }}
+      />
+
+        <Text>{this.state.total} €</Text>
 
         <Picker
           style={{width:100}}
           selectedValue={this.state.pick}
-          onValueChange={(cur) => this.setState({pick: cur})}>
+          onValueChange={(itemValue,itemIndex) => {
+            this.setState({pick: itemValue,
+          pickIndex:itemIndex
+          });
+        }}
+      >
 
-            {this.state.currencies.map((i) => {
-              return <Picker.Item label={i} value={i} key={i} />
-            })}
+        {this.renderPickItems()}
 
 
         </Picker>
 
-<Text>{this.state.pick}</Text>
 
-
-        <Button title="Convert"  />
+        <Button title="Convert" onPress={this.convert} />
       </View>
     );
   }
